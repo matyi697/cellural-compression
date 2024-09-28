@@ -2,3 +2,8 @@ Examples/Demo1/input.bin
 Examples/Demo1/recovered.bin
 Examples/Demo1/main
 Examples/Demo1/compressed.bin
+Examples/Demo2/compressed.bin
+Examples/Demo2/image_data.bin
+Examples/Demo2/main
+Examples/Demo2/output_image.png
+Examples/Demo2/recovered.bin

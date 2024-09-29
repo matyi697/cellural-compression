@@ -8,3 +8,4 @@ Examples/Demo2/main
 Examples/Demo2/output_image.png
 Examples/Demo2/recovered.bin
 cmake-build-debug
+.idea

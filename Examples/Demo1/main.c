@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void decode(char* inputFilename, char* outputFilename) {
+void decode(char *inputFilename, char *outputFilename) {
     int count;
     unsigned char value;
 
@@ -30,7 +30,7 @@ void decode(char* inputFilename, char* outputFilename) {
     }
 }
 
-void compress(char* inputFilename, char* outputFilename) {
+void compress(char *inputFilename, char *outputFilename) {
     int count;
     unsigned char current, next; //lehet nem kell unsigned char
 
@@ -61,22 +61,19 @@ void compress(char* inputFilename, char* outputFilename) {
     }
 }
 
-int main (int argc, char* argv[]) {
-    if (argc < 3){
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
         printf("A korrekt hasznalat:\n\t-Compress: main -c input.bin output.bin\n\t-Decompress: main -d input.bin output.bin\n");
         return -1;
     }
 
-    if (strcmp(argv[1], "-c") == 0){
+    if (strcmp(argv[1], "-c") == 0) {
         compress(argv[2], argv[3]);
         printf("Tomorites sikeres!\n");
-    }
-    else
-    if (strcmp(argv[1], "-d") == 0){
+    } else if (strcmp(argv[1], "-d") == 0) {
         decode(argv[2], argv[3]);
         printf("kicsomagolas sikeres!\n");
-    }
-    else
+    } else
         printf("Hibas argumentumok!\n");
     return 0;
 }

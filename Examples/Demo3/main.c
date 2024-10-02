@@ -184,6 +184,10 @@ void TEST2 () {
     }
 }
 
+void TEST3() {
+
+}
+
 int main(int argc, char *argv[]) {
     TEST2();
     return 0;

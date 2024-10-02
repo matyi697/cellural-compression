@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 
-#define MAX_DEPTH 100
-#define MAX_X 256
-#define MAX_Y 256
+#define MAX_DEPTH 100   //a legkedvezobb tomoritesi arany eleresehez valo max melyseg
+#define MAX_X 50       //a lenyeg hogy 2 hatvany legyen
+#define MAX_Y 50       //a lenyeg hogy 2 hatvany legyen
+typedef unsigned short rule;
 
-void rotate(bool grid[MAX_X][MAX_Y], int iteration, char* direction) {
+void rotate(bool grid[MAX_X][MAX_Y], int iteration, char *direction) {
     bool offset = iteration % 2; // lehet currentIteration & 1
     for (int y = offset; y < MAX_Y - offset; y += 2) {
         for (int x = offset; x < MAX_X - offset; x += 2) {
@@ -30,7 +33,7 @@ void rotate(bool grid[MAX_X][MAX_Y], int iteration, char* direction) {
                     grid[x0][y1] = 0;
                     grid[x0][y0] = 1;
                 }
-            } else if (strcmp(direction, "left")){
+            } else if (strcmp(direction, "left")) {
                 if (grid[x0][y0] && !grid[x1][y0] && !grid[x1][y1] && !grid[x0][y1]) {
                     grid[x0][y0] = 0;
                     grid[x0][y1] = 1;
@@ -79,6 +82,22 @@ void writeGridToFile(char *filename, bool grid[MAX_X][MAX_Y]) {
     fclose(output);
 }
 
+void printGrid(bool grid[MAX_X][MAX_Y]) {
+    for (int y = 0; y < MAX_Y; y++) {
+        for (int x = 0; x < MAX_X; x++)
+            printf("%c", grid[x][y] == 1 ? 'O' : ' ');
+        printf("\n");
+    }
+}
+
+void delay(int number_of_seconds)
+{
+    int milli_seconds = 1000 * number_of_seconds;
+
+    clock_t start_time = clock();
+
+    while (clock() < start_time + milli_seconds);
+}
 /*
 void transformFile(char *inputFilename, char *outputFilename, char *direction, unsigned generation) {
     FILE *inputFile = fopen(inputFilename, "r");
@@ -95,8 +114,8 @@ void transformFile(char *inputFilename, char *outputFilename, char *direction, u
     bool grid[255][255] = {0};
 
 }
-
-void generalisedRuleSet(int rule[][2], int ruleSize, bool grid[MAX_X][MAX_Y, int iteration) {
+*/
+void generalisedRuleSet(rule rules[][2], unsigned ruleSize, bool grid[MAX_X][MAX_Y], int iteration) {
     for (int i = 0; i < iteration; i++) {
         int offset = i % 2;
         for (int y = offset; y < MAX_Y; y++) {
@@ -108,27 +127,64 @@ void generalisedRuleSet(int rule[][2], int ruleSize, bool grid[MAX_X][MAX_Y, int
 
                 int currentState = grid[x0][y0] + (grid[x1][y0] * 2) + (grid[x0][y1] * 4) + (grid[x1][y1] * 8);
                 for (int i = 0; i < ruleSize; i++)
-                    if (currentState == rule[i][0]) {
-                        grid[x0][y0] = 1 & rule[i][1];
-                        grid[x1][y0] = 2 & rule[i][1];
-                        grid[x0][y1] = 4 & rule[i][1];
-                        grid[x1][y1] = 8 & rule[i][1];
+                    if (currentState == rules[i][0]) {
+                        grid[x0][y0] = 1 & rules[i][1];
+                        grid[x1][y0] = 2 & rules[i][1];
+                        grid[x0][y1] = 4 & rules[i][1];
+                        grid[x1][y1] = 8 & rules[i][1];
                     }
             }
         }
     }
 }
-*/
 
-int main(int argc, char *argv[]) {
+void readRule(char* filename, rule rules[][2], unsigned* ruleSize) {
+    *ruleSize = 0;
+    FILE* ruleFile = fopen(filename, "r");
+    rule ruleData = 0;
+    rule resultData = 0;
+    while(fscanf(ruleFile, "%d %d", ruleData, resultData) != 0) {
+        rules[*ruleSize][0] = ruleData;
+        rules[*ruleSize][1] = resultData;
+        *ruleSize++;
+    }
+    fclose(ruleFile);
+    return;
+}
+
+
+
+void TEST1() {
     bool test[MAX_X][MAX_Y] = {0};
-    drawRect(test, 20, 20, 25, 23);
+    drawRect(test, 20, 20, 25, 28);
     writeGridToFile("original.txt", test);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 25; i++)
         rotate(test, i, "right");
     writeGridToFile("rotated.txt", test);
-    for (int i = 9; i >= 0; i--)
+    for (int i = 24; i >= 0; i--)
         rotate(test, i, "left");
     writeGridToFile("recovered.txt", test);
+    return;
+}
+
+void TEST2 () {
+    bool test[MAX_X][MAX_Y] = {0};
+    srand(time(0));
+    for (int y = 10; y < 20; y++)
+        for (int x = 10; x < 20; x++) {
+            test[x][y] = rand() % 4 == 1 ? 1 : 0;
+        }
+
+    while (1) {
+        bool i = 0;
+        rotate(test, i, "right");
+        system("clear");
+        printGrid(test);
+        delay(500);
+    }
+}
+
+int main(int argc, char *argv[]) {
+    TEST2();
     return 0;
 }

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 #define MAX_DEPTH 100   //a legkedvezobb tomoritesi arany eleresehez valo max melyseg
-#define MAX_X 50        //a lenyeg hogy 2 hatvany legyen
-#define MAX_Y 50        //a lenyeg hogy 2 hatvany legyen
+#define MAX_X 110        //a lenyeg hogy 2 hatvany legyen
+#define MAX_Y 110        //a lenyeg hogy 2 hatvany legyen
 #define SET_SIZE 6      //hany rule van
 
 void drawRect(bool grid[MAX_X][MAX_Y], int x0, int y0, int x1, int y1) {
@@ -71,15 +71,15 @@ void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], in
     return;
 }
 
-void readRule(char* filename, unsigned rules[SET_SIZE][2]) {
-    FILE* ruleFile = fopen(filename, "r");
+void readRule(char *filename, unsigned rules[SET_SIZE][2]) {
+    FILE *ruleFile = fopen(filename, "r");
     if (ruleFile == NULL) {
         perror("Hibas bemeneti rule file!\n");
         return;
     }
     unsigned ruleData = 0;
     unsigned resultData = 0;
-    for(int i = 0; (fscanf(ruleFile, "%u %u", &ruleData, &resultData) != 0) && i < SET_SIZE; i++) {
+    for (int i = 0; (fscanf(ruleFile, "%u %u", &ruleData, &resultData) != 0) && i < SET_SIZE; i++) {
         rules[i][0] = ruleData;
         rules[i][1] = resultData;
     }
@@ -90,7 +90,7 @@ void readRule(char* filename, unsigned rules[SET_SIZE][2]) {
 void randomizeRect(bool grid[MAX_X][MAX_Y], int desinty, int x0, int y0, int x1, int y1) {
     srand(time(0));
     for (int y = y0; y < y1; y++)
-        for(int x = x0; x < x1; x++)
+        for (int x = x0; x < x1; x++)
             grid[x][y] = (rand() % desinty == 1) ? 1 : 0;
     return;
 }
@@ -98,7 +98,9 @@ void randomizeRect(bool grid[MAX_X][MAX_Y], int desinty, int x0, int y0, int x1,
 void TEST() {
     unsigned rules[SET_SIZE][2] = {};
     bool grid[MAX_X][MAX_Y] = {0};
-    readRule("/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo3/stringThing.txt", rules);
+    readRule(
+            "/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo3/stringThing.txt",
+            rules);
     randomizeRect(grid, 4, 20, 20, 40, 40);
     writeGridToFile("s_test_in.txt", grid);
     generalisedRuleSet(rules, grid, 1);
@@ -108,7 +110,10 @@ void TEST() {
     return;
 }
 
+
+
 int main(int argc, char *argv[]) {
     TEST();
+
     return 0;
 }

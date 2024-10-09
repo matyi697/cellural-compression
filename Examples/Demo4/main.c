@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define MAX_DEPTH 100   //a legkedvezobb tomoritesi arany eleresehez valo max melyseg
-#define MAX_X 110        //a lenyeg hogy 2 hatvany legyen
+#define MAX_X 110       //a lenyeg hogy 2 hatvany legyen
 #define MAX_Y 20        //a lenyeg hogy 2 hatvany legyen
 #define SET_SIZE 6      //hany rule van
 
@@ -106,7 +106,7 @@ void messageTest() {
     readMessage("/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo4/message.txt", grid);
     int i = 0;
     printGrid(grid);
-    delay(1000);
+    delay(3000);
     while (i < 100) {
         generalisedRuleSet(rules, grid, i);
         printGrid(grid);

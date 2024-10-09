@@ -1,3 +1,7 @@
+#include <stdio.h>
+
+
+
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
     bool offset = iteration % 2; // lehet currentIteration & 1
     for (int y = offset; y < MAX_Y - offset; y += 2) {

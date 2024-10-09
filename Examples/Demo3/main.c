@@ -98,9 +98,7 @@ void randomizeRect(bool grid[MAX_X][MAX_Y], int desinty, int x0, int y0, int x1,
 void TEST() {
     unsigned rules[SET_SIZE][2] = {};
     bool grid[MAX_X][MAX_Y] = {0};
-    readRule(
-            "/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo3/stringThing.txt",
-            rules);
+    readRule("/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo3/stringThing.txt", rules);
     randomizeRect(grid, 4, 20, 20, 40, 40);
     writeGridToFile("s_test_in.txt", grid);
     generalisedRuleSet(rules, grid, 1);
@@ -114,6 +112,5 @@ void TEST() {
 
 int main(int argc, char *argv[]) {
     TEST();
-
     return 0;
 }

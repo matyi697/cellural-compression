@@ -14,7 +14,7 @@ Az RLE egy egyszerű, veszteségmentes tömörítési algoritmus, amely az ismé
 
 ## 📋 Funkciók
 
-- Alap RLE tömörítés implementációja.
-- Sejtautomata-alapú optimalizáció az RLE tömörítésre.
-- Adatminták és tesztfájlok használatával végzett összehasonlítás a két módszer között.
-- Statisztikák készítése a tömörítési arányról és teljesítményről.
+- Alap RLE tömörítés implementációja
+- Sejtautomata-alapú optimalizáció az RLE tömörítésre
+- Adatminták és tesztfájlok használatával végzett összehasonlítás a két módszer között
+- Statisztikák készítése a tömörítési arányról és teljesítményről

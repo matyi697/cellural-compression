@@ -7,7 +7,6 @@
 #define MAX_X 110       //a lenyeg hogy 2 hatvany legyen
 #define MAX_Y 20        //a lenyeg hogy 2 hatvany legyen
 #define SET_SIZE 6      //hany rule van
-#define RULE_PATH "/home/wittmann/Programing/Algoritmusok ás Adatszerkezetek hatékony implementálása C nyelven/Házi Feladat/cellural-compression/Examples/Demo5/rule.txt"
 
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
     bool offset = iteration % 2;
@@ -47,7 +46,7 @@ void readRule(char *filename, unsigned rules[SET_SIZE][2]) {
     fclose(ruleFile);
 }
 
-void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, int tries) {
+void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, bool iteration) {
     FILE* input = fopen(inputfilename, "rb");
     if (input == NULL) {
         perror("Hibas a bemenet file!\n");
@@ -56,43 +55,91 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     FILE* output = fopen(outputFilename, "ab");
     if (output == NULL) {
         perror("Hiba a kimeneti file letrehozasakor!\n");
+        fclose(input);
         return;
     }
 
     unsigned rules[SET_SIZE][2];
-    readRule(RULE_PATH, rules);
+    readRule(ruleFilename, rules);  // Feltételezve, hogy ez a függvény betölti a szabályokat
     unsigned char temp = 0;
     bool grid[MAX_X][MAX_Y] = {0};
     unsigned gridIndex = 0;
 
-    while(fread(&temp, sizeof(unsigned char), 1, input) == 1) {
-        for (int i = 0; i < 8; i++) {   //betoljuk az olvasott adatot a gridbe
+    // Olvasás a fájlból
+    while (fread(&temp, sizeof(unsigned char), 1, input) == 1) {
+        for (int i = 0; i < 8; i++) {
             int y = floor(gridIndex / MAX_X);
-            int x = gridIndex % MAX_X;  // Maradékos osztás a sorokhoz            grid[x][y] = temp & 1;
+            int x = gridIndex % MAX_X;
             grid[x][y] = temp & 1;
-            temp >>= 1; // Jobbra tolás
+            temp >>= 1;
             gridIndex++;
         }
-        if (gridIndex == (MAX_X * MAX_Y)) { // Helyes méret-ellenőrzés
-            for (int m = 0; m < tries; m++)
-                generalisedRuleSet(rules, grid, m);
-            gridIndex = 0;
-            for (int f = 0; f < MAX_X; f++)
-                fwrite(grid[f], sizeof(bool), MAX_Y, output);
-            memset(grid, 0, sizeof(grid));
-        }
-        if (gridIndex > 0) {
-            for (int m = 0; m < tries; m++)
-                generalisedRuleSet(rules, grid, m);
-            for (int f = 0; f < MAX_X; f++)
-                fwrite(grid[f], sizeof(bool), MAX_Y, output);
+
+       
+        if (gridIndex == (MAX_X * MAX_Y)) {
+                generalisedRuleSet(rules, grid, iteration);  // Feldolgozás a szabályokkal
+        printf("kaki");
+            // Grid kiírása hexadecimális formában
+            unsigned char byteBuffer = 0;
+            int bitCounter = 0;
+            for (int y = 0; y < MAX_Y; y++) {
+                for (int x = 0; x < MAX_X; x++) {
+                    byteBuffer <<= 1;          // Helyet csinálunk a következő bitnek
+                    byteBuffer |= grid[x][y];  // Hozzáadjuk a bitet
+                    bitCounter++;
+                    if (bitCounter == 8) {  // Ha egy byte-nyi bit összegyűlt
+                        fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
+                        byteBuffer = 0;
+                        bitCounter = 0;
+                    }
+                }
+            }
+
+            // Maradék bitek kezelése (ha nem volt 8-mal osztható a grid méret)
+            if (bitCounter > 0) {
+                byteBuffer <<= (8 - bitCounter);  // Kitöltjük a maradék biteket nullákkal
+                fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
+            }
+
+            gridIndex = 0;  // Reseteljük az indexet a következő blokknak
+            memset(grid, 0, sizeof(grid));  // Grid nullázása
         }
     }
+
+    // Ha maradtak adatok a gridben
+    if (gridIndex > 0) {
+        printf("kaki");
+        generalisedRuleSet(rules, grid, iteration);  // Feldolgozás
+
+        // Kiírjuk a fennmaradó gridet hexadecimális formában
+        unsigned char byteBuffer = 0;
+        int bitCounter = 0;
+        for (int y = 0; y < MAX_Y; y++) {
+            for (int x = 0; x < MAX_X; x++) {
+                byteBuffer <<= 1;
+                byteBuffer |= grid[x][y];
+                bitCounter++;
+                if (bitCounter == 8) {
+                    fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
+                    byteBuffer = 0;
+                    bitCounter = 0;
+                }
+            }
+        }
+
+        // Ha maradtak ki nem írt bitek, azokat is kiírjuk
+        if (bitCounter > 0) {
+            byteBuffer <<= (8 - bitCounter);
+            fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
+        }
+    }
+
     fclose(output);
     fclose(input);
 }
 
 int main () {
-    transformFile("test.bin", "asd.bin", "rules.txt", 0);
+    transformFile("input.bin", "output.bin", "stringThing.txt", 0);
+    transformFile("output.bin", "recovered.bin", "stringThing.txt", 0);
     return 0;
 }

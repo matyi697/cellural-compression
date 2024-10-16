@@ -14,6 +14,6 @@ void createFile(char* filename, unsigned size) {
 }
 
 int main (int argc, char* argv[]) {
-    createFile(argv[1], atoi(argv[2])*1024);
+    createFile(argv[1], atoi(argv[2]));
     return 0;
 }

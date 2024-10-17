@@ -3,16 +3,14 @@
 #include <string.h>
 #include <math.h>
 
-#define MAX_DEPTH 100   //a legkedvezobb tomoritesi arany eleresehez valo max melyseg
-#define MAX_X 110       //a lenyeg hogy 2 hatvany legyen
-#define MAX_Y 20        //a lenyeg hogy 2 hatvany legyen
-#define SET_SIZE 6      //hany rule van
+#define MAX_X 256
+#define MAX_Y 256
+#define SET_SIZE 6
 
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
     bool offset = iteration % 2;
     for (int y = offset; y < MAX_Y - offset; y += 2) {
         for (int x = offset; x < MAX_X - offset; x += 2) {
-            // Túlindexelési problémák elkerülése
             int x0 = x;
             int x1 = x + 1 > MAX_X ? 0 : x + 1;
             int y0 = y;
@@ -52,7 +50,7 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
         perror("Hibas a bemenet file!\n");
         return;
     }
-    FILE* output = fopen(outputFilename, "ab");
+    FILE* output = fopen(outputFilename, "wb");
     if (output == NULL) {
         perror("Hiba a kimeneti file letrehozasakor!\n");
         fclose(input);
@@ -60,12 +58,11 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     }
 
     unsigned rules[SET_SIZE][2];
-    readRule(ruleFilename, rules);  // Feltételezve, hogy ez a függvény betölti a szabályokat
+    readRule(ruleFilename, rules);
     unsigned char temp = 0;
     bool grid[MAX_X][MAX_Y] = {0};
     unsigned gridIndex = 0;
 
-    // Olvasás a fájlból
     while (fread(&temp, sizeof(unsigned char), 1, input) == 1) {
         for (int i = 0; i < 8; i++) {
             int y = floor(gridIndex / MAX_X);
@@ -77,17 +74,15 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
 
        
         if (gridIndex == (MAX_X * MAX_Y)) {
-                generalisedRuleSet(rules, grid, iteration);  // Feldolgozás a szabályokkal
-        printf("kaki");
-            // Grid kiírása hexadecimális formában
+            generalisedRuleSet(rules, grid, iteration);
             unsigned char byteBuffer = 0;
             int bitCounter = 0;
             for (int y = 0; y < MAX_Y; y++) {
                 for (int x = 0; x < MAX_X; x++) {
-                    byteBuffer <<= 1;          // Helyet csinálunk a következő bitnek
-                    byteBuffer |= grid[x][y];  // Hozzáadjuk a bitet
+                    byteBuffer <<= 1;
+                    byteBuffer |= grid[x][y];
                     bitCounter++;
-                    if (bitCounter == 8) {  // Ha egy byte-nyi bit összegyűlt
+                    if (bitCounter == 8) {
                         fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
                         byteBuffer = 0;
                         bitCounter = 0;
@@ -95,23 +90,20 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
                 }
             }
 
-            // Maradék bitek kezelése (ha nem volt 8-mal osztható a grid méret)
             if (bitCounter > 0) {
-                byteBuffer <<= (8 - bitCounter);  // Kitöltjük a maradék biteket nullákkal
+                byteBuffer <<= (8 - bitCounter);
                 fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
             }
 
-            gridIndex = 0;  // Reseteljük az indexet a következő blokknak
-            memset(grid, 0, sizeof(grid));  // Grid nullázása
+            gridIndex = 0;
+            memset(grid, 0, sizeof(grid));
         }
     }
 
     // Ha maradtak adatok a gridben
     if (gridIndex > 0) {
-        printf("kaki");
-        generalisedRuleSet(rules, grid, iteration);  // Feldolgozás
+        generalisedRuleSet(rules, grid, iteration);
 
-        // Kiírjuk a fennmaradó gridet hexadecimális formában
         unsigned char byteBuffer = 0;
         int bitCounter = 0;
         for (int y = 0; y < MAX_Y; y++) {
@@ -127,7 +119,6 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
             }
         }
 
-        // Ha maradtak ki nem írt bitek, azokat is kiírjuk
         if (bitCounter > 0) {
             byteBuffer <<= (8 - bitCounter);
             fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
@@ -138,8 +129,67 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     fclose(input);
 }
 
-int main () {
-    transformFile("input.bin", "output.bin", "stringThing.txt", 0);
-    transformFile("output.bin", "recovered.bin", "stringThing.txt", 0);
+
+void decode(char *inputFilename, char *outputFilename) {
+    int count;
+    unsigned char value;
+
+    FILE *input = fopen(inputFilename, "rb");
+    if (input == NULL) {
+        perror("Hiba a bemeneti fileban!");
+    }
+
+    FILE *output = fopen(outputFilename, "wb");
+    if (output == NULL) {
+        perror("Hiba a file letrehozasban!");
+        fclose(input);
+    }
+
+    while (!feof(input)) {
+        count = fgetc(input);
+        if (feof(input)) break;
+
+        value = fgetc(input);
+        if (feof(input)) break;
+
+        for (int i = 0; i < count; i++) {
+            fputc(value, output);
+        }
+    }
+}
+
+void compress(char *inputFilename, char *outputFilename) {
+    int count;
+    unsigned char current, next; //lehet nem kell unsigned char
+
+    FILE *input = fopen(inputFilename, "rb");
+    if (input == NULL) {
+        perror("Hiba az input file megnyitasakor");
+    }
+
+    FILE *output = fopen(outputFilename, "wb");
+    if (output == NULL) {
+        perror("Hiba az output file eloallitasabans");
+        fclose(input);
+    }
+
+    current = fgetc(input);
+
+    while (!feof(input)) {
+        count = 1;
+
+        while ((next = fgetc(input)) == current && count < 255) {
+            count++;
+        }
+
+        fputc(count, output);
+        fputc(current, output);
+
+        current = next;
+    }
+}
+
+int main (int argc, char* argv[]) {
+
     return 0;
 }

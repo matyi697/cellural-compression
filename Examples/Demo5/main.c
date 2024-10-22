@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define MAX_X 256
 #define MAX_Y 256
@@ -100,7 +101,6 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
         }
     }
 
-    // Ha maradtak adatok a gridben
     if (gridIndex > 0) {
         generalisedRuleSet(rules, grid, iteration);
 
@@ -124,11 +124,9 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
             fwrite(&byteBuffer, sizeof(unsigned char), 1, output);
         }
     }
-
     fclose(output);
     fclose(input);
 }
-
 
 void decode(char *inputFilename, char *outputFilename) {
     int count;
@@ -160,7 +158,7 @@ void decode(char *inputFilename, char *outputFilename) {
 
 void compress(char *inputFilename, char *outputFilename) {
     int count;
-    unsigned char current, next; //lehet nem kell unsigned char
+    unsigned char current, next;
 
     FILE *input = fopen(inputFilename, "rb");
     if (input == NULL) {
@@ -189,7 +187,53 @@ void compress(char *inputFilename, char *outputFilename) {
     }
 }
 
-int main (int argc, char* argv[]) {
+long getFileSize(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+        perror("Hiba a fájl megnyitásakor");
+        return -1;
+    }
 
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fclose(file);
+
+    return size;
+}
+
+/*
+./main [input filename] [iterations] [ruleset]
+*/
+
+int main (int argc, char* argv[]) {
+    /*if (argc < 4) {
+        perror("Hibas argumetumok, helyes hasznalat:\n");
+        printf("./%s [input filename] [output filename] [-c/d] [iterations]\n", argv[0]);
+        return -1;
+    }*/
+    
+    unsigned depth = atoi(argv[2]);
+    long minSize = 0;
+    int minIndex = -1;
+    long startSize = getFileSize(argv[1]);
+    char copyCommand[256];
+    sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);
+    system(copyCommand);
+    compress("Data/file1.bin", "Data/baseline.bin");
+    for (int i = 0; i < depth; i++) {
+        transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
+        compress("Data/file2.bin", "Data/compressed.bin");
+        long sizeFile = getFileSize("Data/compressed.bin");
+        printf("%d \n", sizeFile);
+        if (sizeFile <= minSize || minSize == 0) {
+            minIndex = i;
+            minSize = sizeFile;
+            rename("Data/compressed.bin", "Data/compressed_final.bin");
+        }
+        remove("Data/file1.bin");
+        rename("Data/file2.bin", "Data/file1.bin");
+    }
+
+    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
     return 0;
 }

@@ -12,7 +12,7 @@ def bin_to_image(bin_path, output_image_path, size, mode='RGB'):
 # Paraméterek
 bin_path = 'recovered.bin'  # Bináris fájl neve
 output_image_path = 'output_image.png'  # Kimeneti kép neve
-size = (640, 480)  # Kép mérete (szélesség, magasság)
+size = (800, 600)  # Kép mérete (szélesség, magasság)
 mode = 'RGBA'  # Színmód
 
 # Bináris fájl visszaalakítása képre

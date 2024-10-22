@@ -155,13 +155,13 @@ int main (int argc, char* argv[]) {
 
     unsigned depth = atoi(argv[2]);
 
-    if (strcmp(argv[4], "-c")) {
+    if (!strcmp(argv[4], "-c")) {
 
     }
-    else if (strcmp(argv[4], "-d")) {
+    else if (!strcmp(argv[4], "-d")) {
 
     }
-    else if (strcmp(argv[4], "-t")) {
+    else if (!strcmp(argv[4], "-t")) {
         long minSize = 0;
         int minIndex = -1;
         long startSize = getFileSize(argv[1]);
@@ -180,10 +180,12 @@ int main (int argc, char* argv[]) {
                 minSize = sizeFile;
                 rename("Data/compressed.bin", "Data/compressed_final.bin");
             }
+            remove("Data/file1.bin");
+            rename("Data/file2.bin", "Data/file1.bin");
         }
-        printf("Az eredet file méret: %d\n", sizeFile)
+        printf("Az eredet file méret: %lu\n", getFileSize("Data/compressed.bin"));
+        printf("A baseline meret: %lu\n", getFileSize("Data/baseline.bin"));
         printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
-    
     }
 
     return 0;

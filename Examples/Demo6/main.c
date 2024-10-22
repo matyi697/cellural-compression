@@ -128,65 +128,6 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     fclose(input);
 }
 
-void decode(char *inputFilename, char *outputFilename) {
-    int count;
-    unsigned char value;
-
-    FILE *input = fopen(inputFilename, "rb");
-    if (input == NULL) {
-        perror("Hiba a bemeneti fileban!");
-    }
-
-    FILE *output = fopen(outputFilename, "wb");
-    if (output == NULL) {
-        perror("Hiba a file letrehozasban!");
-        fclose(input);
-    }
-
-    while (!feof(input)) {
-        count = fgetc(input);
-        if (feof(input)) break;
-
-        value = fgetc(input);
-        if (feof(input)) break;
-
-        for (int i = 0; i < count; i++) {
-            fputc(value, output);
-        }
-    }
-}
-
-void compress(char *inputFilename, char *outputFilename) {
-    int count;
-    unsigned char current, next;
-
-    FILE *input = fopen(inputFilename, "rb");
-    if (input == NULL) {
-        perror("Hiba az input file megnyitasakor");
-    }
-
-    FILE *output = fopen(outputFilename, "wb");
-    if (output == NULL) {
-        perror("Hiba az output file eloallitasabans");
-        fclose(input);
-    }
-
-    current = fgetc(input);
-
-    while (!feof(input)) {
-        count = 1;
-
-        while ((next = fgetc(input)) == current && count < 255) {
-            count++;
-        }
-
-        fputc(count, output);
-        fputc(current, output);
-
-        current = next;
-    }
-}
-
 long getFileSize(const char *filename) {
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
@@ -206,35 +147,44 @@ long getFileSize(const char *filename) {
 */
 
 int main (int argc, char* argv[]) {
-    /*if (argc < 4) {
+    if (argc < 5) {
         perror("Hibas argumetumok, helyes hasznalat:\n");
-        printf("./%s [input filename] [output filename] [-c/d] [iterations]\n", argv[0]);
+        printf("./%s [input filename] [output filename] [-c/d/t] [iterations]\n", argv[0]);
         return -1;
-    }*/
-    
-    unsigned depth = atoi(argv[2]);
-    long minSize = 0;
-    int minIndex = -1;
-    long startSize = getFileSize(argv[1]);
-    char copyCommand[256];
-    sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);
-    system(copyCommand);
-    compress("Data/file1.bin", "Data/baseline.bin");
-    for (int i = 0; i < depth; i++) {
-        transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
-        compress("Data/file2.bin", "Data/compressed.bin");
-        long sizeFile = getFileSize("Data/compressed.bin");
-        printf("%d \n", sizeFile);
-        if (sizeFile <= minSize || minSize == 0) {
-            minIndex = i;
-            minSize = sizeFile;
-            rename("Data/compressed.bin", "Data/compressed_final.bin");
-        }
-        remove("Data/file1.bin");
-        rename("Data/file2.bin", "Data/file1.bin");
     }
 
-    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);7
+    unsigned depth = atoi(argv[2]);
+
+    if (strcmp(argv[4], "-c")) {
+
+    }
+    else if (strcmp(argv[4], "-d")) {
+
+    }
+    else if (strcmp(argv[4], "-t")) {
+        long minSize = 0;
+        int minIndex = -1;
+        long startSize = getFileSize(argv[1]);
+        char copyCommand[256];
+        sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);  //csinalunk egy file1.bin copyt az eredeti filerol
+        system(copyCommand);
+        system("python huffman.py -c Data/file1.bin Data/baseline.bin"); //ez a file a sima tomorites eredemyne a baseline.bin
+        
+        for (int i = 0; i < depth; i++) {
+            transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
+            system("python huffman.py -c Data/file2.bin Data/compressed.bin");
+            long sizeFile = getFileSize("Data/compressed.bin");
+            printf("%d \n", sizeFile);
+            if (sizeFile <= minSize || minSize == 0) {
+                minIndex = i;
+                minSize = sizeFile;
+                rename("Data/compressed.bin", "Data/compressed_final.bin");
+            }
+        }
+        printf("Az eredet file méret: %d\n", sizeFile)
+        printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
     
+    }
+
     return 0;
 }

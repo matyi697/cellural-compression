@@ -7,7 +7,6 @@
 #define MAX_X 256
 #define MAX_Y 256
 #define SET_SIZE 6
-#define MAX_DEPTH 50
 
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
     bool offset = iteration % 2;
@@ -74,7 +73,7 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
             gridIndex++;
         }
 
-
+       
         if (gridIndex == (MAX_X * MAX_Y)) {
             generalisedRuleSet(rules, grid, iteration);
             unsigned char byteBuffer = 0;
@@ -202,34 +201,40 @@ long getFileSize(const char *filename) {
     return size;
 }
 
+/*
+./main [input filename] [iterations] [ruleset]
+*/
+
 int main (int argc, char* argv[]) {
+    /*if (argc < 4) {
+        perror("Hibas argumetumok, helyes hasznalat:\n");
+        printf("./%s [input filename] [output filename] [-c/d] [iterations]\n", argv[0]);
+        return -1;
+    }*/
+    
+    unsigned depth = atoi(argv[2]);
     long minSize = 0;
     int minIndex = -1;
     long startSize = getFileSize(argv[1]);
     char copyCommand[256];
-    sprintf(copyCommand, "cp %s file1.bin", argv[1]);
+    sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);
     system(copyCommand);
-
-    for (int i = 0; i < MAX_DEPTH; i++) {
-        transformFile("file1.bin", "file2.bin", "stringThing.txt", i);
-        compress("file2.bin", "compressed.bin");
-        long sizeFile = getFileSize("compressed.bin");
+    compress("Data/file1.bin", "Data/baseline.bin");
+    for (int i = 0; i < depth; i++) {
+        transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
+        compress("Data/file2.bin", "Data/compressed.bin");
+        long sizeFile = getFileSize("Data/compressed.bin");
+        printf("%d \n", sizeFile);
         if (sizeFile <= minSize || minSize == 0) {
             minIndex = i;
             minSize = sizeFile;
+            rename("Data/compressed.bin", "Data/compressed_final.bin");
         }
-        remove("file1.bin");
-        rename("file2.bin", "file1.bin");
+        remove("Data/file1.bin");
+        rename("Data/file2.bin", "Data/file1.bin");
     }
 
-    for (int i = 0; i <= minIndex; i++) {
-        transformFile("file1.bin", "file2.bin", "stringThing.txt", i);
-        remove("file1.bin");
-        rename("file2.bin", "file1.bin");
-    }
-
-    remove("compressed.bin");
-    compress("file1.bin", "compressed.bin");
-    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
+    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);7
+    
     return 0;
 }

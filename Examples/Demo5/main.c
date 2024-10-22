@@ -234,6 +234,7 @@ int main (int argc, char* argv[]) {
         rename("Data/file2.bin", "Data/file1.bin");
     }
 
-    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
+    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);7
+    
     return 0;
 }

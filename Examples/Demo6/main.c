@@ -142,26 +142,39 @@ long getFileSize(const char *filename) {
     return size;
 }
 
-/*
-./main [input filename] [iterations] [ruleset]
-*/
-
 int main (int argc, char* argv[]) {
-    if (argc < 5) {
-        perror("Hibas argumetumok, helyes hasznalat:\n");
-        printf("./%s [input filename] [output filename] [-c/d/t] [iterations]\n", argv[0]);
-        return -1;
+    //az argumentmok:
+    char*       inputfilename   =   argv[1];
+    char*       flag            =   argv[2];
+    unsigned    depth           =   atoi(argv[3]);
+    char*       ruleSetFilename =   argv[4];
+    char*       compressExec =   argv[5];
+    char*       outputFilename  =   argv[6];
+
+    if (strcmp(flag, "-c") == 0) {
+        /*
+        -az input filet lemasoljuk a data/temp -be mint file 1
+        -vegrehajtjuk az iteraciokat a file 1 el
+        -a kimenetet kimentjuk az 
+        */
+        char copyCommand[256];
+        sprintf(copyCommand, "cp %s data/temp/file1.bin", inputfilename);
+        system(copyCommand);
+        for (int i = 0; i < depth; i++) {
+            transformFile("data/temp/file1.bin", "data/temp/file2.bin", ruleSetFilename, i);
+            rename("data/temp/file2.bin", "data/temp/file1.bin");
+        }        
+        char compressCommand[256];
+        sprintf(compressCommand, "%s -c data/temp/file1.bin data/temp/%s.bin", compressExec, outputFilename);
+        printf("Tomorites sikeres!\n");
     }
 
-    unsigned depth = atoi(argv[2]);
 
-    if (!strcmp(argv[4], "-c")) {
 
-    }
-    else if (!strcmp(argv[4], "-d")) {
+/*
 
-    }
-    else if (!strcmp(argv[4], "-t")) {
+
+if (!strcmp(argv[4], "-t")) {
         long minSize = 0;
         int minIndex = -1;
         long startSize = getFileSize(argv[1]);
@@ -187,6 +200,6 @@ int main (int argc, char* argv[]) {
         printf("A baseline meret: %lu\n", getFileSize("Data/baseline.bin"));
         printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
     }
-
+*/
     return 0;
 }

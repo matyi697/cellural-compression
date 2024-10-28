@@ -1,35 +1,17 @@
-## Projekt leírása
+# Reverzibilis Sejtautomata Demo
 
-Ez a projekt bemutatja, hogyan lehet egy PNG képet bináris fájlba konvertálni, azt Run-Length Encoding (RLE) algoritmussal tömöríteni, majd a tömörített adatokat visszaállítani és újra PNG formátumba építeni.
+Ez a projekt egy reverzibilis sejtautomata modellt mutat be C nyelven. A modell célja, hogy a reverzibilitást demonstrálja egy ASCII képen végrehajtott lépések előre- és visszaléptetésével, így visszakapva az eredeti mintát.
 
-A folyamat a következő lépéseket tartalmazza:
-1. A PNG kép bináris fájlformátummá alakítása.
-2. Az így kapott bináris fájl tömörítése az RLE algoritmussal.
-3. Az RLE tömörített adat visszafejtése eredeti bináris formátumra.
-4. A visszanyert bináris adatokból egy új PNG fájl létrehozása.
+## Leírás
 
-## Fájlok
-
-- **input_image.png**: Az eredeti PNG kép, amelyet a demó használ.
-- **image_data.bin**: Az input PNG kép bináris formátuma.
-- **compressed.bin**: A bináris fájl RLE tömörített változata.
-- **recovered.bin**: Az RLE tömörítés visszafejtett bináris fájlja.
-- **output_image.png**: A végleges PNG fájl, amelyet a visszaállított bináris adatokból készítünk.
+A program egy  megadott ASCII karakterekből álló mintát olvas be egy `.txt` fileból, majd végrehajt rajta egy adott számú lépést a reverzibilis sejtautomata szabályai szerint. Ezután ugyanennyi lépést visszalép, és a kapott eredményt kiírja, így bemutatva, hogy a folyamat valóban reverzibilis, hiszen az eredeti képet kapjuk vissza.
 
 ## Használat
 
-### 1. PNG kép konvertálása bin fájlba
+1. **Bemeneti fájl készítése**: Készíts egy `.txt` filet egy ASCII művészeti képpel, amely a sejtautomata bemenete lesz.
+2. **Ruleset file készítése**: A modellnek szükséges egy sejtauomata szabályrendszer amit számpárokként olvas fel egy `.txt` fileból
+3. **Fordítás és futtatás**: Fordítsd és futtasd a programot a következő parancsokkal:
 
-python image_to_binary.py
-
-### 2. Bináris fájl RLE kódolása
-
-./main -c image_data.bin compressed.bin
-
-### 3. Bináris fájl visszaállítása
-
-./main -d compressed.bin recovered.bin
-
-### 4. Kép visszaállítása a bin fájlból
-
-python binary_to_image.py
+   ```bash
+   gcc -o automata automata.c
+   ./automata message.txt rule.txt

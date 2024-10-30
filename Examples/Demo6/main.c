@@ -45,7 +45,7 @@ void readRule(char *filename, unsigned rules[SET_SIZE][2]) {
     fclose(ruleFile);
 }
 
-void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, bool iteration) {
+void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, int iteration) {
     FILE* input = fopen(inputfilename, "rb");
     if (input == NULL) {
         perror("Hibas a bemenet file!\n");
@@ -152,20 +152,47 @@ int main (int argc, char* argv[]) {
     char*       outputFilename  =   argv[6];
 
     if (strcmp(flag, "-c") == 0) {
-        /*
-        -az input filet lemasoljuk a data/temp -be mint file 1
-        -vegrehajtjuk az iteraciokat a file 1 el
-        -a kimenetet kimentjuk az 
-        */
         char copyCommand[256];
         sprintf(copyCommand, "cp %s data/temp/file1.bin", inputfilename);
         system(copyCommand);
+
         for (int i = 0; i < depth; i++) {
+            printf("%d\n", i);
             transformFile("data/temp/file1.bin", "data/temp/file2.bin", ruleSetFilename, i);
+            remove("data/temp/file1.bin");
             rename("data/temp/file2.bin", "data/temp/file1.bin");
         }        
         char compressCommand[256];
         sprintf(compressCommand, "%s -c data/temp/file1.bin data/temp/%s.bin", compressExec, outputFilename);
+        printf("%s\n", compressCommand);
+        rename("data/temp/file1.bin", outputFilename);
+        printf("Tomorites sikeres!\n");
+    } else 
+
+    if (strcmp(flag, "-t") == 0) {
+        transformFile("data/input.bin", "data/output.bin", ruleSetFilename, 0);
+        transformFile("data/output.bin", "data/output2.bin", ruleSetFilename, 1);
+        transformFile("data/output2.bin", "data/output3.bin", ruleSetFilename, 1);
+
+        transformFile("data/output3.bin", "data/recovered.bin", ruleSetFilename, 0);
+    } else
+
+    if (strcmp(flag, "-d") == 0) {
+        char copyCommand[256];
+        sprintf(copyCommand, "cp %s data/temp/file1.bin", inputfilename);
+        system(copyCommand); 
+
+        for (int i = depth-1; i >=  0; i--) {
+            printf("%d\n", i);
+            transformFile("data/temp/file1.bin", "data/temp/file2.bin", ruleSetFilename, i);
+            remove("data/temp/file1.bin");
+            rename("data/temp/file2.bin", "data/temp/file1.bin");
+        } 
+
+        char compressCommand[256];
+        sprintf(compressCommand, "%s -d data/temp/file1.bin data/temp/%s.bin", compressExec, outputFilename);
+        printf("%s\n", compressCommand);
+        rename("data/temp/file1.bin", outputFilename);
         printf("Tomorites sikeres!\n");
     }
 

@@ -1,4 +1,4 @@
 gcc -o main main.c
 gcc -o RLE RLE.c
-./main data/input.bin -c 2 stringThing.txt "pyhon huffman" data/output.bin
-./main data/output.bin -d 2 stringThing.txt "pyhon huffman" data/recovered.bin
+./main data/input.bin -c 1 stringThing.txt "python huffman.py" data/output.bin
+./main data/output.bin -d 1 stringThing.txt "python huffman.py" data/recovered.bin

@@ -4,8 +4,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define MAX_X 256
-#define MAX_Y 256
+#define MAX_X 8
+#define MAX_Y 8
 #define SET_SIZE 6
 
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
@@ -45,7 +45,7 @@ void readRule(char *filename, unsigned rules[SET_SIZE][2]) {
     fclose(ruleFile);
 }
 
-void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, bool iteration) {
+void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename, bool offset, int iterations) {
     FILE* input = fopen(inputfilename, "rb");
     if (input == NULL) {
         perror("Hibas a bemenet file!\n");
@@ -75,7 +75,8 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
 
        
         if (gridIndex == (MAX_X * MAX_Y)) {
-            generalisedRuleSet(rules, grid, iteration);
+            for (int i = offset; i < iterations + offset; i++)
+                generalisedRuleSet(rules, grid, i);
             unsigned char byteBuffer = 0;
             int bitCounter = 0;
             for (int y = 0; y < MAX_Y; y++) {
@@ -102,7 +103,8 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     }
 
     if (gridIndex > 0) {
-        generalisedRuleSet(rules, grid, iteration);
+        for (int i = offset; i < iterations + offset; i++)
+                generalisedRuleSet(rules, grid, i);
 
         unsigned char byteBuffer = 0;
         int bitCounter = 0;
@@ -128,65 +130,6 @@ void transformFile(char* inputfilename, char* outputFilename, char* ruleFilename
     fclose(input);
 }
 
-void decode(char *inputFilename, char *outputFilename) {
-    int count;
-    unsigned char value;
-
-    FILE *input = fopen(inputFilename, "rb");
-    if (input == NULL) {
-        perror("Hiba a bemeneti fileban!");
-    }
-
-    FILE *output = fopen(outputFilename, "wb");
-    if (output == NULL) {
-        perror("Hiba a file letrehozasban!");
-        fclose(input);
-    }
-
-    while (!feof(input)) {
-        count = fgetc(input);
-        if (feof(input)) break;
-
-        value = fgetc(input);
-        if (feof(input)) break;
-
-        for (int i = 0; i < count; i++) {
-            fputc(value, output);
-        }
-    }
-}
-
-void compress(char *inputFilename, char *outputFilename) {
-    int count;
-    unsigned char current, next;
-
-    FILE *input = fopen(inputFilename, "rb");
-    if (input == NULL) {
-        perror("Hiba az input file megnyitasakor");
-    }
-
-    FILE *output = fopen(outputFilename, "wb");
-    if (output == NULL) {
-        perror("Hiba az output file eloallitasabans");
-        fclose(input);
-    }
-
-    current = fgetc(input);
-
-    while (!feof(input)) {
-        count = 1;
-
-        while ((next = fgetc(input)) == current && count < 255) {
-            count++;
-        }
-
-        fputc(count, output);
-        fputc(current, output);
-
-        current = next;
-    }
-}
-
 long getFileSize(const char *filename) {
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
@@ -201,40 +144,50 @@ long getFileSize(const char *filename) {
     return size;
 }
 
-/*
-./main [input filename] [iterations] [ruleset]
-*/
-
 int main (int argc, char* argv[]) {
-    /*if (argc < 4) {
-        perror("Hibas argumetumok, helyes hasznalat:\n");
-        printf("./%s [input filename] [output filename] [-c/d] [iterations]\n", argv[0]);
+    if (argc != 7) {
+        printf("A helyes hasznalat:\n./%s [input file] [-c/-d/-t] [rule] [iterations] [output filename] [compressor]\n");
         return -1;
-    }*/
-    
-    unsigned depth = atoi(argv[2]);
-    long minSize = 0;
-    int minIndex = -1;
-    long startSize = getFileSize(argv[1]);
-    char copyCommand[256];
-    sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);
-    system(copyCommand);
-    compress("Data/file1.bin", "Data/baseline.bin");
-    for (int i = 0; i < depth; i++) {
-        transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
-        compress("Data/file2.bin", "Data/compressed.bin");
-        long sizeFile = getFileSize("Data/compressed.bin");
-        printf("%d \n", sizeFile);
-        if (sizeFile <= minSize || minSize == 0) {
-            minIndex = i;
-            minSize = sizeFile;
-            rename("Data/compressed.bin", "Data/compressed_final.bin");
-        }
-        remove("Data/file1.bin");
-        rename("Data/file2.bin", "Data/file1.bin");
     }
-
-    printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);7
+    char* inputFilename = argv[1];
+    char* flag = argv[2];
+    char* ruleFilename = argv[3];
+    int iterations = atoi(argv[4]);
+    char* outputFilename = argv[5];
+    char* compressorProgram = argv[6];
     
+    if (strcmp(flag, "-t") == 0) {
+        transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
+        
+        char compressCommand[256];
+        
+        sprintf(compressCommand, "%s -c temp.bin %s", compressorProgram, "compressed.bin");
+        system(compressCommand);
+        
+        memset(compressCommand, '\0', sizeof(compressCommand));
+        
+        sprintf(compressCommand, "%s -c input.bin %s", compressorProgram, "compressed_original.bin");
+        system(compressCommand);
+
+        printf("A bemeneti file merete: %ld bajt\n", getFileSize(inputFilename));
+        printf("A tomoritett file merete sejtautomataval %ld bajt\n", getFileSize("compressed.bin"));
+        printf("A tomoritett file merete eredetileg %ld bajt\n", getFileSize("compressed_original.bin"));
+        printf("A tomoritesi rata a sejtautomatat alkalmazva: %.3f\n",
+        (float)getFileSize(inputFilename)/(float)getFileSize("compressed.bin"));
+        printf("A tomoritesi rata az eredeti fileal: %.3f\n",
+        (float)getFileSize(inputFilename)/(float)getFileSize("compressed_original.bin"));
+
+        
+    } else
+    if (strcmp(flag, "-c") == 0) {
+
+    }
+    else
+    if (strcmp(flag, "-d") == 0) {
+
+    }
+        transformFile(argv[1], "temp.bin", "stringThing.txt", 0, 20);
+
+    transformFile("temp.bin", "output.bin", "stringThing.txt", 1, 20);
     return 0;
 }

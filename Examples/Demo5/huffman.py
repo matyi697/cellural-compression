@@ -81,7 +81,6 @@ class HuffmanCoding:
         with open(output_file, 'wb') as f:
             f.write(bytes(b))
 
-        print(f'Tömörítés kész: {output_file}')
         return output_file
 
     def decode(self, encoded_data):
@@ -114,7 +113,6 @@ class HuffmanCoding:
         with open(output_file, 'wb') as f:
             f.write(decompressed_data)
 
-        print(f'Visszafejtés kész: {output_file}')
         return output_file
 
 # Parancssori feldolgozás

@@ -1,4 +1,3 @@
 gcc -o main main.c
-python image_to_binary.py
 
-./main
+./main input.bin -t stringThing.txt 20 test "python huffman.py"

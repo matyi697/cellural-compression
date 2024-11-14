@@ -4,8 +4,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define MAX_X 256
-#define MAX_Y 256
+#define MAX_X 8
+#define MAX_Y 8
 #define SET_SIZE 6
 
 void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], int iteration) {
@@ -13,9 +13,9 @@ void generalisedRuleSet(unsigned rules[SET_SIZE][2], bool grid[MAX_X][MAX_Y], in
     for (int y = offset; y < MAX_Y - offset; y += 2) {
         for (int x = offset; x < MAX_X - offset; x += 2) {
             int x0 = x;
-            int x1 = x + 1 > MAX_X ? 0 : x + 1;
+            int x1 = (x + 1 > MAX_X) ? 0 : x + 1;
             int y0 = y;
-            int y1 = y + 1 > MAX_Y ? 0 : y + 1;
+            int y1 = (y + 1 > MAX_Y) ? 0 : y + 1;
 
             int currentState = grid[x0][y0] + (grid[x1][y0] * 2) + (grid[x0][y1] * 4) + (grid[x1][y1] * 8);
             for (int n = 0; n < SET_SIZE; n++)
@@ -163,18 +163,21 @@ int main (int argc, char* argv[]) {
             rename("data/temp/file2.bin", "data/temp/file1.bin");
         }        
         char compressCommand[256];
-        sprintf(compressCommand, "%s -c data/temp/file1.bin data/temp/%s.bin", compressExec, outputFilename);
+        sprintf(compressCommand, "%s -c data/temp/file1.bin %s", compressExec, outputFilename);
         printf("%s\n", compressCommand);
-        rename("data/temp/file1.bin", outputFilename);
+        system(compressCommand);
+        //rename("data/temp/file1.bin", outputFilename);
         printf("Tomorites sikeres!\n");
     } else 
 
     if (strcmp(flag, "-t") == 0) {
         transformFile("data/input.bin", "data/output.bin", ruleSetFilename, 0);
         transformFile("data/output.bin", "data/output2.bin", ruleSetFilename, 1);
-        transformFile("data/output2.bin", "data/output3.bin", ruleSetFilename, 1);
+        transformFile("data/output2.bin", "data/output3.bin", ruleSetFilename, 2);
 
-        transformFile("data/output3.bin", "data/recovered.bin", ruleSetFilename, 0);
+        transformFile("data/output3.bin", "data/output4.bin", ruleSetFilename, 1);
+        transformFile("data/output4.bin", "data/output5.bin", ruleSetFilename, 1);
+        transformFile("data/output5.bin", "data/recovered.bin", ruleSetFilename, 0);
     } else
 
     if (strcmp(flag, "-d") == 0) {
@@ -190,43 +193,11 @@ int main (int argc, char* argv[]) {
         } 
 
         char compressCommand[256];
-        sprintf(compressCommand, "%s -d data/temp/file1.bin data/temp/%s.bin", compressExec, outputFilename);
+        sprintf(compressCommand, "%s -d data/temp/file1.bin %s", compressExec, outputFilename);
         printf("%s\n", compressCommand);
-        rename("data/temp/file1.bin", outputFilename);
+        system(compressCommand);
+        //rename("data/temp/file1.bin", outputFilename);
         printf("Tomorites sikeres!\n");
     }
-
-
-
-/*
-
-
-if (!strcmp(argv[4], "-t")) {
-        long minSize = 0;
-        int minIndex = -1;
-        long startSize = getFileSize(argv[1]);
-        char copyCommand[256];
-        sprintf(copyCommand, "cp %s Data/file1.bin", argv[1]);  //csinalunk egy file1.bin copyt az eredeti filerol
-        system(copyCommand);
-        system("python huffman.py -c Data/file1.bin Data/baseline.bin"); //ez a file a sima tomorites eredemyne a baseline.bin
-        
-        for (int i = 0; i < depth; i++) {
-            transformFile("Data/file1.bin", "Data/file2.bin", argv[3], i);
-            system("python huffman.py -c Data/file2.bin Data/compressed.bin");
-            long sizeFile = getFileSize("Data/compressed.bin");
-            printf("%d \n", sizeFile);
-            if (sizeFile <= minSize || minSize == 0) {
-                minIndex = i;
-                minSize = sizeFile;
-                rename("Data/compressed.bin", "Data/compressed_final.bin");
-            }
-            remove("Data/file1.bin");
-            rename("Data/file2.bin", "Data/file1.bin");
-        }
-        printf("Az eredet file méret: %lu\n", getFileSize("Data/compressed.bin"));
-        printf("A baseline meret: %lu\n", getFileSize("Data/baseline.bin"));
-        printf("A kompresszios rata: %f \nA kimeneti meret: %lu \nAz index: %d", ((double)startSize/(double)minSize), minSize, minIndex);
-    }
-*/
     return 0;
 }

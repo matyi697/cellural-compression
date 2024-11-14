@@ -158,7 +158,7 @@ int main (int argc, char* argv[]) {
     
     if (strcmp(flag, "-t") == 0) {
         transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
-        
+
         char compressCommand[256];
         
         sprintf(compressCommand, "%s -c temp.bin %s", compressorProgram, "compressed.bin");
@@ -177,11 +177,17 @@ int main (int argc, char* argv[]) {
         printf("A tomoritesi rata az eredeti fileal: %.3f\n",
         (float)getFileSize(inputFilename)/(float)getFileSize("compressed_original.bin"));
 
+        memset(compressCommand, '\0', sizeof(compressCommand));
+        sprintf(compressCommand, "%s -d compressed.bin %s", compressorProgram, "rec_tmp.bin");
+        system(compressCommand);
         
+        transformFile("temp.bin", "recovered.bin", ruleFilename, 1, iterations);
+
     } else
     if (strcmp(flag, "-c") == 0) {
-
-    }
+        transformFile("input.bin", "asd.bin", ruleFilename, 0, 10);
+        transformFile("asd.bin", "recoverd.bin", ruleFilename, 1, 10);
+    }   
     else
     if (strcmp(flag, "-d") == 0) {
 

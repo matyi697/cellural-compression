@@ -2,6 +2,7 @@ import heapq
 import os
 import sys
 from collections import defaultdict, Counter
+from collections import deque
 
 # Huffman Tree node
 class Node:

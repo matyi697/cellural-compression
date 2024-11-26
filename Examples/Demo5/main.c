@@ -185,12 +185,14 @@ int main (int argc, char* argv[]) {
 
     } else
     if (strcmp(flag, "-c") == 0) {
-        transformFile("input.bin", "asd.bin", ruleFilename, 0, 10);
-        transformFile("asd.bin", "recoverd.bin", ruleFilename, 1, 10);
+        transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
+        
+        remove("temp.bin");
+
     }   
     else
     if (strcmp(flag, "-d") == 0) {
-
+        transformFile("temp.bin", outputFilename, ruleFilename, 1, iterations);
     }
         transformFile(argv[1], "temp.bin", "stringThing.txt", 0, 20);
 

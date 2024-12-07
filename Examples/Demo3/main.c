@@ -146,7 +146,7 @@ long getFileSize(const char *filename) {
 
 int main (int argc, char* argv[]) {
     if (argc != 7) {
-        printf("A helyes hasznalat:\n./%s [input file] [-c/-d/-t] [rule] [iterations] [output filename] [compressor]\n");
+        printf("A helyes hasznalat:\n./%s [input file] [rule] [iterations] [output filename] [compressor]\n");
         return -1;
     }
     char* inputFilename = argv[1];
@@ -156,46 +156,23 @@ int main (int argc, char* argv[]) {
     char* outputFilename = argv[5];
     char* compressorProgram = argv[6];
     
-    if (strcmp(flag, "-t") == 0) {
-        transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
-
-        char compressCommand[256];
-        
-        sprintf(compressCommand, "%s -c temp.bin %s", compressorProgram, "compressed.bin");
-        system(compressCommand);
-        
-        memset(compressCommand, '\0', sizeof(compressCommand));
-        
-        sprintf(compressCommand, "%s -c input.bin %s", compressorProgram, "compressed_original.bin");
-        system(compressCommand);
-
-        printf("A bemeneti file merete: %ld bajt\n", getFileSize(inputFilename));
-        printf("A tomoritett file merete sejtautomataval %ld bajt\n", getFileSize("compressed.bin"));
-        printf("A tomoritett file merete eredetileg %ld bajt\n", getFileSize("compressed_original.bin"));
-        printf("A tomoritesi rata a sejtautomatat alkalmazva: %.3f\n",
-        (float)getFileSize(inputFilename)/(float)getFileSize("compressed.bin"));
-        printf("A tomoritesi rata az eredeti fileal: %.3f\n",
-        (float)getFileSize(inputFilename)/(float)getFileSize("compressed_original.bin"));
-
-        memset(compressCommand, '\0', sizeof(compressCommand));
-        sprintf(compressCommand, "%s -d compressed.bin %s", compressorProgram, "rec_tmp.bin");
-        system(compressCommand);
-        
-        transformFile("temp.bin", "recovered.bin", ruleFilename, 1, iterations);
-
-    } else
-    if (strcmp(flag, "-c") == 0) {
-        transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
-        
-        remove("temp.bin");
-
-    }   
-    else
-    if (strcmp(flag, "-d") == 0) {
-        transformFile("temp.bin", outputFilename, ruleFilename, 1, iterations);
-    }
-        transformFile(argv[1], "temp.bin", "stringThing.txt", 0, 20);
-
-    transformFile("temp.bin", "output.bin", "stringThing.txt", 1, 20);
+    transformFile(inputFilename, "temp.bin", ruleFilename, 0, iterations);
+    char compressCommand[256];
+    
+    sprintf(compressCommand, "%s -c temp.bin %s", compressorProgram, "compressed.bin");
+    system(compressCommand);
+    
+    memset(compressCommand, '\0', sizeof(compressCommand));
+    
+    sprintf(compressCommand, "%s -c input.bin %s", compressorProgram, "compressed_original.bin");
+    system(compressCommand);
+    printf("A bemeneti file merete: %ld bajt\n", getFileSize(inputFilename));
+    printf("A tomoritett file merete sejtautomataval %ld bajt\n", getFileSize("compressed.bin"));
+    printf("A tomoritett file merete eredetileg %ld bajt\n", getFileSize("compressed_original.bin"));
+    printf("A tomoritesi rata a sejtautomatat alkalmazva: %.3f\n",
+    (float)getFileSize("compressed.bin")/(float)getFileSize(inputFilename));
+    printf("A tomoritesi rata az eredeti fileal: %.3f\n",
+    (float)getFileSize("compressed_original.bin")/(float)getFileSize(inputFilename));
+    
     return 0;
 }
